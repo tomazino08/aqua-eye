@@ -3,99 +3,200 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Aqua-Eye</title>
 <style>
-body{margin:0;font-family:Arial,sans-serif;background:#0b3d5c;color:#fff;padding:20px}
-.box{max-width:480px;margin:0 auto}
-h1{margin:0 0 4px}
-.sub{opacity:.85;margin:0 0 20px}
-label{display:block;margin:12px 0 4px;font-weight:bold}
-select,input,textarea{width:100%;box-sizing:border-box;padding:10px;border:0;border-radius:6px;font-size:1rem}
-button{margin-top:16px;width:100%;padding:12px;border:0;border-radius:6px;background:#1fa2d6;color:#fff;font-size:1.1rem;font-weight:bold}
-#msg{margin-top:12px;min-height:1.2em}
-.item{background:#14577f;border-radius:6px;padding:10px;margin-top:10px}
-.item small{opacity:.75}
+:root{--bg:#f5f5f7;--card:#fff;--text:#1d1d1f;--muted:#5c5c61;--line:#e5e5ea;--accent:#0066cc;--on-accent:#fff;--alert:#c4281c;--shadow:0 2px 12px rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#0b0b0d;--card:#1c1c1e;--text:#f5f5f7;--muted:#a1a1a6;--line:#2c2c2e;--accent:#4da3ff;--on-accent:#001a33;--alert:#ff7a70;--shadow:0 2px 12px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.4 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:480px;margin:0 auto;padding:24px 20px 48px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:32px}
+.brand svg{width:24px;height:24px;fill:var(--accent)}
+h1{font-size:28px;font-weight:600;line-height:1.2;margin:0 0 8px}
+h2{font-size:17px;font-weight:600;margin:40px 0 8px}
+.hint,.meta{font-size:16px;color:var(--muted)}
+.hint{margin:0 0 16px}
+textarea{display:block;width:100%;min-height:160px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);font:inherit;resize:none;box-shadow:var(--shadow);transition:border-color .2s}
+textarea:focus{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
+button:active{transform:scale(.98)}
+.primary{display:block;width:100%;min-height:52px;margin-top:16px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent)}
+.primary:disabled{opacity:.6;cursor:default}
+.ghost{display:block;width:100%;min-height:52px;margin-top:16px;border:0;border-radius:14px;background:transparent;color:var(--accent)}
+.link{min-height:44px;padding:0 8px;border:0;background:transparent;color:var(--accent)}
+#msg{min-height:24px;margin:12px 0 0;font-size:16px;color:var(--alert)}
+.card{background:var(--card);border-radius:16px;padding:24px 20px;box-shadow:var(--shadow)}
+.drop{position:relative;width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center}
+.drop svg{width:32px;height:32px;fill:var(--accent);z-index:1;animation:pop .3s ease-out}
+.drop::before,.drop::after{content:"";position:absolute;inset:0;border:2px solid var(--accent);border-radius:50%;opacity:0;animation:ring 1.2s ease-out 1}
+.drop::after{animation-delay:.25s}
+@keyframes ring{0%{transform:scale(.4);opacity:.7}100%{transform:scale(1.4);opacity:0}}
+@keyframes pop{from{transform:scale(.6)}to{transform:scale(1)}}
+.done-title{text-align:center;font-weight:600;margin:0 0 16px}
+.row{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--line)}
+.row span:first-child{font-size:16px;color:var(--muted)}
+.row span:last-child{text-align:right;word-break:break-word}
+.note{font-size:16px;color:var(--muted);margin:16px 0 0}
+.item{background:var(--card);border-radius:12px;padding:16px;margin-bottom:8px;box-shadow:var(--shadow);word-break:break-word}
+.item strong{display:block;font-weight:600}
+.high{color:var(--alert);font-weight:600}
+.sk{height:72px;border-radius:12px;background:var(--line);margin-bottom:8px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="box">
-<h1>💧 Aqua-Eye</h1>
-<p class="sub">Signaler un problème d'eau</p>
+<main>
+<div class="brand">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.6 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-2.4-6.6-6-11z"/></svg>
+<span>Aqua-Eye</span>
+</div>
 
-<label for="type">Type de problème</label>
-<select id="type">
-<option>Panne de pompe</option>
-<option>Eau polluée</option>
-<option>Fuite</option>
-<option>Pénurie d'eau</option>
-</select>
+<section id="form">
+<h1>Que se passe-t-il ?</h1>
+<p class="hint">Décrivez le lieu et le problème. Une phrase suffit.</p>
+<label for="texte" hidden>Votre signalement</label>
+<textarea id="texte" maxlength="1000" placeholder="Ex. : La pompe du quartier Godomey est en panne depuis 3 jours."></textarea>
+<button id="envoyer" class="primary">Envoyer</button>
+<p id="msg" role="status" aria-live="polite"></p>
+</section>
 
-<label for="lieu">Lieu</label>
-<input id="lieu" maxlength="200" placeholder="Quartier, village...">
-
-<label for="desc">Description</label>
-<textarea id="desc" rows="3" maxlength="1000"></textarea>
-
-<button id="envoyer">Envoyer le signalement</button>
-<div id="msg"></div>
+<section id="done" hidden>
+<div class="card">
+<div class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.6 4.4-6 7.6-6 11a6 6 0 0 0 12 0c0-3.4-2.4-6.6-6-11z"/></svg></div>
+<p class="done-title">Signalement envoyé</p>
+<div class="row"><span>Problème</span><span id="r-type"></span></div>
+<div class="row"><span>Urgence</span><span id="r-urg"></span></div>
+<div class="row"><span>Point d'eau</span><span id="r-lieu"></span></div>
+<p class="note" id="r-note" hidden>L'analyse automatique n'a pas répondu. Votre message est bien enregistré.</p>
+</div>
+<button id="nouveau" class="ghost">Nouveau signalement</button>
+</section>
 
 <h2>Derniers signalements</h2>
 <div id="liste"></div>
-</div>
+</main>
 
 <script>
 const BASE = "https://vvnqfvpswughneqjyvhw.supabase.co/rest/v1/signalements";
 const KEY = "sb_publishable_TqMSG-00c_6l28P3qVMlOA_dQiAuaxP";
 const HEAD = { "apikey": KEY, "Content-Type": "application/json" };
+const $ = function (id) { return document.getElementById(id); };
 
-const msg = document.getElementById("msg");
-const liste = document.getElementById("liste");
+function setMsg(t) { $("msg").textContent = t || ""; }
+
+function pause(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+async function analyser(texte) {
+  for (let i = 0; i < 3; i++) {
+    try {
+      const r = await fetch("/api/analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texte: texte })
+      });
+      if (r.ok) return await r.json();
+    } catch (e) {}
+    await pause(800 * (i + 1));
+  }
+  return null;
+}
+
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
 
 async function charger() {
+  const liste = $("liste");
+  liste.textContent = "";
+  for (let i = 0; i < 3; i++) {
+    const sk = document.createElement("div");
+    sk.className = "sk";
+    liste.appendChild(sk);
+  }
   try {
-    const r = await fetch(BASE + "?select=*&order=created_at.desc&limit=10", { headers: HEAD });
+    const r = await fetch(BASE + "?select=type,lieu,urgence,created_at&order=created_at.desc&limit=5", { headers: HEAD });
     if (!r.ok) throw new Error(r.status);
     const data = await r.json();
     liste.textContent = "";
+    if (!data.length) {
+      const p = document.createElement("p");
+      p.className = "meta";
+      p.textContent = "Aucun signalement pour l'instant.";
+      liste.appendChild(p);
+      return;
+    }
     data.forEach(function (s) {
       const d = document.createElement("div");
       d.className = "item";
       const t = document.createElement("strong");
-      t.textContent = s.type + " — " + s.lieu;
-      const p = document.createElement("div");
-      p.textContent = s.description || "";
-      const h = document.createElement("small");
-      h.textContent = new Date(s.created_at).toLocaleString("fr-FR");
-      d.append(t, p, h);
+      t.textContent = s.type + " · " + s.lieu;
+      const m = document.createElement("span");
+      m.className = "meta";
+      if (s.urgence) {
+        const u = document.createElement("span");
+        u.textContent = "Urgence " + s.urgence;
+        if (s.urgence === "haute") u.className = "high";
+        m.appendChild(u);
+        m.appendChild(document.createTextNode(" · "));
+      }
+      m.appendChild(document.createTextNode(new Date(s.created_at).toLocaleString("fr-FR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })));
+      d.append(t, m);
       liste.appendChild(d);
     });
   } catch (e) {
-    liste.textContent = "Impossible de charger la liste.";
+    liste.textContent = "";
+    const p = document.createElement("p");
+    p.className = "meta";
+    p.textContent = "Impossible de charger la liste.";
+    const b = document.createElement("button");
+    b.className = "link";
+    b.textContent = "Réessayer";
+    b.onclick = charger;
+    liste.append(p, b);
   }
 }
 
-document.getElementById("envoyer").onclick = async function () {
-  const lieu = document.getElementById("lieu").value.trim();
-  if (!lieu) { msg.textContent = "⚠️ Indique le lieu."; return; }
-  msg.textContent = "Envoi...";
+$("envoyer").onclick = async function () {
+  const btn = $("envoyer");
+  const texte = $("texte").value.trim();
+  if (texte.length < 10) { setMsg("Écrivez au moins une phrase."); return; }
+  btn.disabled = true;
+  btn.textContent = "Analyse en cours…";
+  setMsg("");
   try {
+    const a = await analyser(texte);
+    const rec = {
+      type: a ? a.type : "Autre",
+      lieu: a ? a.point_eau : "inconnu",
+      description: texte,
+      urgence: a ? a.urgence : null
+    };
     const r = await fetch(BASE, {
       method: "POST",
       headers: Object.assign({ "Prefer": "return=minimal" }, HEAD),
-      body: JSON.stringify({
-        type: document.getElementById("type").value,
-        lieu: lieu,
-        description: document.getElementById("desc").value.trim()
-      })
+      body: JSON.stringify(rec)
     });
     if (!r.ok) throw new Error(r.status);
-    msg.textContent = "✅ Signalement enregistré.";
-    document.getElementById("lieu").value = "";
-    document.getElementById("desc").value = "";
+    $("r-type").textContent = rec.type;
+    $("r-urg").textContent = rec.urgence ? cap(rec.urgence) : "À confirmer";
+    $("r-lieu").textContent = rec.lieu;
+    $("r-note").hidden = !!a;
+    $("form").hidden = true;
+    $("done").hidden = false;
     charger();
   } catch (e) {
-    msg.textContent = "❌ Échec de l'envoi.";
+    setMsg("Envoi impossible. Vérifiez la connexion, puis réessayez.");
   }
+  btn.disabled = false;
+  btn.textContent = "Envoyer";
+};
+
+$("nouveau").onclick = function () {
+  $("texte").value = "";
+  $("done").hidden = true;
+  $("form").hidden = false;
+  $("texte").focus();
 };
 
 charger();
