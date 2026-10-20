@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Gemini</title>
+<style>
+body{font-family:Arial,sans-serif;background:#0b3d5c;color:#fff;padding:20px;max-width:480px;margin:0 auto}
+textarea{width:100%;box-sizing:border-box;padding:10px;border:0;border-radius:8px;font-size:1rem}
+button{margin-top:12px;width:100%;padding:12px;border:0;border-radius:8px;background:#1fa2d6;color:#fff;font-size:1.1rem;font-weight:bold}
+pre{background:#14577f;padding:12px;border-radius:8px;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<h1>Test Gemini</h1>
+<textarea id="t" rows="4">La pompe du quartier Godomey est en panne depuis 3 jours, les enfants n'ont plus d'eau potable.</textarea>
+<button id="go">Analyser</button>
+<pre id="out">Résultat ici</pre>
+<script>
+document.getElementById("go").onclick = async function () {
+  const out = document.getElementById("out");
+  out.textContent = "Analyse...";
+  try {
+    const r = await fetch("/api/analyse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texte: document.getElementById("t").value })
+    });
+    out.textContent = JSON.stringify(await r.json(), null, 2);
+  } catch (e) {
+    out.textContent = "Erreur réseau";
+  }
+};
+</script>
+</body>
+</html>
