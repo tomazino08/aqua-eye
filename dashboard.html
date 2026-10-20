@@ -46,12 +46,17 @@ button:active{transform:scale(.96);opacity:.85}
 <p class="foot">Score = 100 − pénalités (haute 25, moyenne 10, faible 4). Signalements de plus de 7 jours : moitié. Alerte dès 3 signalements en 7 jours.</p>
 
 <script>
-const SUPABASE_URL = "COLLE_ICI_L_URL_DE_TON_INDEX";
-const SUPABASE_ANON_KEY = "COLLE_ICI_LA_CLE_ANON_DE_TON_INDEX";
-
 const app = document.getElementById("app");
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 const statut = s => s < 40 ? "Critique" : s < 70 ? "À surveiller" : "Fiable";
+
+let SUPA = null, KEY = null;
+async function config() {
+  if (SUPA && KEY) return;
+  const t = await (await fetch("/index.html")).text();
+  SUPA = t.match(/const BASE = "([^"]+)"/)[1].split("/rest/")[0];
+  KEY = t.match(/const KEY = "([^"]+)"/)[1];
+}
 
 function skeleton() {
   app.replaceChildren();
@@ -106,15 +111,16 @@ function afficher(points) {
 async function charger() {
   skeleton();
   try {
-    const r = await fetch(SUPABASE_URL + "/rest/v1/scores_points_eau?select=*&order=score.asc&limit=50", {
-      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY }
+    await config();
+    const r = await fetch(SUPA + "/rest/v1/scores_points_eau?select=*&order=score.asc&limit=50", {
+      headers: { apikey: KEY }
     });
     if (!r.ok) throw new Error(r.status);
     const data = await r.json();
     if (!data.length) return message("Aucun signalement ces 30 derniers jours.", "Actualiser");
     afficher(data);
   } catch (e) {
-    message("Chargement impossible. Vérifie ta connexion.", "Réessayer");
+    message("Chargement impossible (" + e.message + ").", "Réessayer");
   }
 }
 charger();
