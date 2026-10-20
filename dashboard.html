@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Aqua-Eye · Priorités</title>
+<style>
+:root{--bg:#f5f5f7;--card:#fff;--tx:#1d1d1f;--tx2:#5f6368;--ac:#0062e0;--ac-tx:#fff;--track:#e5e5ea;--sh:0 2px 12px rgba(0,0,0,.06)}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--card:#1c1c1e;--tx:#f5f5f7;--tx2:#a1a1a6;--ac:#4c9aff;--ac-tx:#000;--track:#3a3a3c;--sh:none}}
+*{box-sizing:border-box;margin:0}
+body{font:400 16px/1.4 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--tx);padding:max(20px,env(safe-area-inset-top)) 16px 40px;max-width:560px;margin:0 auto}
+h1{font-size:28px;font-weight:600;letter-spacing:-.02em}
+.sub{color:var(--tx2);margin:4px 0 24px}
+.card{background:var(--card);border-radius:16px;box-shadow:var(--sh);padding:16px;margin-bottom:16px}
+.hero{display:flex;gap:16px;align-items:center;padding:24px 16px}
+.hero .lab{color:var(--tx2)}
+.hero .nom{font-size:17px;font-weight:600;margin:4px 0 8px}
+.pill{display:inline-block;background:var(--ac);color:var(--ac-tx);font-weight:600;border-radius:999px;padding:4px 12px}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:9;stroke-linecap:round}
+.ring .t{stroke:var(--track)}
+.ring .v{stroke:var(--ac);stroke-dasharray:264;stroke-dashoffset:264;transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:28px;font-weight:600}
+h2{font-size:17px;font-weight:600;margin:24px 0 8px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:56px;border-bottom:1px solid var(--track);padding:8px 0}
+.row:last-child{border:0}
+.row .nom{font-weight:600;overflow-wrap:anywhere}
+.row .meta{color:var(--tx2)}
+.row .sc{font-size:17px;font-weight:600;flex:none}
+button{font:600 16px -apple-system,"SF Pro Text",Roboto,sans-serif;min-height:44px;min-width:44px;padding:0 20px;border:0;border-radius:12px;background:var(--ac);color:var(--ac-tx);cursor:pointer;transition:transform .15s,opacity .15s}
+button:active{transform:scale(.96);opacity:.85}
+.sk{border-radius:12px;background:linear-gradient(90deg,var(--track),var(--card),var(--track));background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.msg{text-align:center;padding:32px 16px;color:var(--tx2)}
+.msg p{margin-bottom:16px}
+.foot{color:var(--tx2);margin-top:24px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<h1>Priorités de la semaine</h1>
+<p class="sub">Abomey-Calavi · points d'eau classés par fiabilité</p>
+<main id="app" aria-live="polite"></main>
+<p class="foot">Score = 100 − pénalités (haute 25, moyenne 10, faible 4). Signalements de plus de 7 jours : moitié. Alerte dès 3 signalements en 7 jours.</p>
+
+<script>
+const SUPABASE_URL = "COLLE_ICI_L_URL_DE_TON_INDEX";
+const SUPABASE_ANON_KEY = "COLLE_ICI_LA_CLE_ANON_DE_TON_INDEX";
+
+const app = document.getElementById("app");
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const statut = s => s < 40 ? "Critique" : s < 70 ? "À surveiller" : "Fiable";
+
+function skeleton() {
+  app.replaceChildren();
+  [140, 64, 64, 64].forEach(h => { const s = el("div", "sk"); s.style.height = h + "px"; s.style.marginBottom = "16px"; app.append(s); });
+}
+
+function message(texte, action) {
+  app.replaceChildren();
+  const c = el("div", "card msg");
+  c.append(el("p", "", texte));
+  const b = el("button", "", action); b.onclick = charger; c.append(b);
+  app.append(c);
+}
+
+function ring(score) {
+  const w = el("div", "ring");
+  w.innerHTML = '<svg width="96" height="96" viewBox="0 0 96 96"><circle class="t" cx="48" cy="48" r="42"/><circle class="v" cx="48" cy="48" r="42"/></svg>';
+  w.append(el("b", "", String(score)));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    w.querySelector(".v").style.strokeDashoffset = 264 * (1 - score / 100);
+  }));
+  return w;
+}
+
+function afficher(points) {
+  app.replaceChildren();
+  const top = points[0];
+  const hero = el("div", "card hero");
+  hero.append(ring(top.score));
+  const t = el("div");
+  t.append(el("div", "lab", "À traiter en premier"), el("div", "nom", top.point_eau));
+  t.append(top.alerte ? el("span", "pill", "Alerte · " + top.nb_7j + " signalements") : el("span", "lab", statut(top.score)));
+  hero.append(t);
+  app.append(hero);
+
+  app.append(el("h2", "", "Classement"));
+  const liste = el("div", "card");
+  points.forEach(p => {
+    const r = el("div", "row");
+    const g = el("div");
+    g.append(el("div", "nom", p.point_eau),
+      el("div", "meta", statut(p.score) + " · " + p.nb_7j + " cette semaine" + (p.alerte ? " · alerte" : "")));
+    r.append(g, el("div", "sc", p.score + "/100"));
+    liste.append(r);
+  });
+  app.append(liste);
+
+  const b = el("button", "", "Actualiser"); b.onclick = charger;
+  app.append(b);
+}
+
+async function charger() {
+  skeleton();
+  try {
+    const r = await fetch(SUPABASE_URL + "/rest/v1/scores_points_eau?select=*&order=score.asc&limit=50", {
+      headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + SUPABASE_ANON_KEY }
+    });
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    if (!data.length) return message("Aucun signalement ces 30 derniers jours.", "Actualiser");
+    afficher(data);
+  } catch (e) {
+    message("Chargement impossible. Vérifie ta connexion.", "Réessayer");
+  }
+}
+charger();
+</script>
+</body>
+</html>
