@@ -36,6 +36,17 @@ h2{font-size:18px;font-weight:600;margin:32px 0 8px}
 .link{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:16px;color:var(--ac);font-weight:600;text-decoration:none}
 a:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+body{position:relative;overflow-x:hidden}
+body::before{content:"";position:absolute;inset:0 0 auto 0;height:440px;z-index:-1;pointer-events:none;background:repeating-radial-gradient(circle at 88% -40px,transparent 0 36px,rgba(10,102,255,.1) 37px 38px),radial-gradient(ellipse at 50% 0,rgba(10,102,255,.16),transparent 70%);-webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
+h1{font-size:34px;line-height:1.1;letter-spacing:-.03em;margin-top:48px}
+.cta{position:relative;overflow:hidden;min-height:72px}
+.cta::after{content:"";position:absolute;top:0;bottom:0;left:-50%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent);animation:shine 4s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-50%}100%{left:130%}}
+.card{margin-top:32px;padding:20px}
+.tip-h b{display:flex;align-items:center;gap:8px}
+.tip-h b::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ac);animation:pulse 1.6s ease-in-out infinite}
+#liste{background:var(--card);border-radius:16px;padding:8px 16px;box-shadow:var(--sh)}
+.sc{padding:4px 12px;border-radius:999px;background:rgba(10,102,255,.08)}
 </style>
 </head>
 <body>
