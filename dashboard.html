@@ -48,7 +48,7 @@ button:active{transform:scale(.96);opacity:.85}
 <script>
 const app = document.getElementById("app");
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-const statut = s => s < 40 ? "Critique" : s < 70 ? "À surveiller" : "Fiable";
+const statut = s => s < 60 ? "Critique" : s < 85 ? "À surveiller" : "Fiable";
 
 let SUPA = null, KEY = null;
 async function config() {
