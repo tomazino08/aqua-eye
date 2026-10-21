@@ -50,14 +50,9 @@ const app = document.getElementById("app");
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 const statut = s => s < 60 ? "Critique" : s < 85 ? "À surveiller" : "Fiable";
 
-let SUPA = null, KEY = null;
-async function config() {
-  if (SUPA && KEY) return;
-  const t = await (await fetch("/index.html")).text();
-  SUPA = t.match(/const BASE = "([^"]+)"/)[1].split("/rest/")[0];
-  KEY = t.match(/const KEY = "([^"]+)"/)[1];
-}
-
+const SUPA = "https://vvnqfvpswughneqjyvhw.supabase.co";
+const KEY = "sb_publishable_TqMSG-00c_6l28P3qVMlOA_dQiAuaxP";
+async function config() {}
 function skeleton() {
   app.replaceChildren();
   [140, 64, 64, 64].forEach(h => { const s = el("div", "sk"); s.style.height = h + "px"; s.style.marginBottom = "16px"; app.append(s); });
