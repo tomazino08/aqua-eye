@@ -1,6 +1,5 @@
 const TYPES = ["Panne de pompe", "Eau polluée", "Fuite", "Pénurie d'eau", "Autre"];
 const URGENCES = ["faible", "moyenne", "haute"];
-const SECOURS = "gemini-2.5-flash";
 
 const FENETRE_MS = 10 * 60 * 1000;
 const MAX_APPELS = 20;
@@ -16,13 +15,13 @@ function limite(ip) {
   return false;
 }
 
-async function appeler(model, key, texte) {
+async function appeler(model, key, texte, delai) {
   const r = await fetch(
     "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
     {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(delai),
       body: JSON.stringify({
         systemInstruction: {
           parts: [{
@@ -63,13 +62,16 @@ module.exports = async function handler(req, res) {
   const texte = String((req.body && req.body.texte) || "").trim().slice(0, 1000);
   if (!texte) return res.status(400).json({ erreur: "Texte vide" });
 
-  const principal = process.env.GEMINI_MODEL || SECOURS;
-  const modeles = principal === SECOURS ? [SECOURS] : [principal, SECOURS];
+  const principal = process.env.GEMINI_MODEL;
+  if (!principal) return res.status(500).json({ erreur: "GEMINI_MODEL manquant sur Vercel" });
+  const secours = process.env.GEMINI_MODEL_SECOURS;
+  const modeles = secours && secours !== principal ? [principal, secours] : [principal];
+  const delai = modeles.length > 1 ? 4500 : 8500;
   const echecs = [];
 
   for (const model of modeles) {
     try {
-      const out = await appeler(model, key, texte);
+      const out = await appeler(model, key, texte, delai);
       return res.status(200).json({
         type: TYPES.includes(out.type) ? out.type : "Autre",
         urgence: URGENCES.includes(out.urgence) ? out.urgence : "moyenne",
