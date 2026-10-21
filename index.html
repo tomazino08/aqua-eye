@@ -291,6 +291,7 @@ $("envoyer").onclick = async function () {
       type: a ? a.type : "Autre",
       lieu: a ? a.point_eau : "inconnu",
       description: texte,
+      device_id: (function () { try { var k = "aqe_device", v = localStorage.getItem(k); if (!v) { v = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2); localStorage.setItem(k, v); } return v; } catch (e) { return null; } })(),
       urgence: a ? a.urgence : null
     };
     const r = await fetch(BASE, {
