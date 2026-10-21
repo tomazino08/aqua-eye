@@ -28,7 +28,10 @@ button:active{transform:scale(.98)}
 .mic:active{transform:scale(.94)}
 .mic.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .mic.on::after{content:"";position:absolute;inset:-4px;border:2px solid var(--accent);border-radius:50%;animation:listen 1.3s ease-out infinite}
+.mic.busy{opacity:.7;pointer-events:none}
+.mic.busy::after{content:"";position:absolute;inset:-3px;border:2px solid transparent;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes listen{0%{transform:scale(.9);opacity:.8}100%{transform:scale(1.5);opacity:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .primary{display:block;width:100%;min-height:52px;margin-top:16px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent)}
 .primary:disabled{opacity:.6;cursor:default}
 .ghost{display:block;width:100%;min-height:52px;margin-top:16px;border:0;border-radius:14px;background:transparent;color:var(--accent)}
@@ -64,11 +67,11 @@ button:active{transform:scale(.98)}
 
 <section id="form">
 <h1>Que se passe-t-il ?</h1>
-<p class="hint">Écrivez ou dictez. Une phrase suffit.</p>
+<p class="hint">Écrivez ou dictez. Vérifiez le texte avant d'envoyer.</p>
 <label for="texte" hidden>Votre signalement</label>
 <div class="field">
 <textarea id="texte" maxlength="1000" placeholder="Ex. : La pompe du quartier Godomey est en panne depuis 3 jours."></textarea>
-<button id="mic" class="mic" type="button" aria-label="Dicter le signalement" aria-pressed="false" hidden>
+<button id="mic" class="mic" type="button" aria-label="Dicter le signalement" hidden>
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
 </button>
 </div>
@@ -123,50 +126,101 @@ async function analyser(texte) {
 
 function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
 
-/* ---------- Dictée vocale ---------- */
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+/* ---------- Dictée vocale (enregistrement + transcription Whisper) ---------- */
 const mic = $("mic");
-let rec = null, ecoute = false, base = "", erreurMic = false;
+const PEUT = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+let enr = null, flux = null, morceaux = [], minuteur = null, etat = "repos";
 
-function etatMic(on) {
-  ecoute = on;
-  mic.classList.toggle("on", on);
-  mic.setAttribute("aria-pressed", on ? "true" : "false");
-  mic.setAttribute("aria-label", on ? "Arrêter la dictée" : "Dicter le signalement");
+function etatMic(e) {
+  etat = e;
+  mic.classList.toggle("on", e === "ecoute");
+  mic.classList.toggle("busy", e === "transcription");
+  mic.setAttribute("aria-label", e === "ecoute" ? "Arrêter la dictée" : "Dicter le signalement");
 }
 
-if (SR) {
+function typeAudio() {
+  const c = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+  for (let i = 0; i < c.length; i++) { if (MediaRecorder.isTypeSupported(c[i])) return c[i]; }
+  return "";
+}
+
+function liberer() {
+  if (flux) { flux.getTracks().forEach(function (t) { t.stop(); }); flux = null; }
+}
+
+function versBase64(blob) {
+  return new Promise(function (ok, ko) {
+    const r = new FileReader();
+    r.onload = function () { ok(String(r.result).split(",")[1] || ""); };
+    r.onerror = ko;
+    r.readAsDataURL(blob);
+  });
+}
+
+function arreter() {
+  clearTimeout(minuteur);
+  if (enr && enr.state === "recording") enr.stop();
+}
+
+async function demarrer() {
+  setMsg("");
+  try {
+    flux = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) {
+    setMsg("Micro refusé. Autorisez-le dans le navigateur.");
+    return;
+  }
+  const t = typeAudio();
+  try {
+    enr = t ? new MediaRecorder(flux, { mimeType: t, audioBitsPerSecond: 32000 }) : new MediaRecorder(flux);
+  } catch (e) {
+    liberer();
+    setMsg("Dictée impossible. Écrivez le message.");
+    return;
+  }
+  morceaux = [];
+  enr.ondataavailable = function (e) { if (e.data && e.data.size) morceaux.push(e.data); };
+  enr.onstop = traiter;
+  enr.start();
+  etatMic("ecoute");
+  setMsg("Je vous écoute… Touchez pour arrêter.", true);
+  minuteur = setTimeout(arreter, 30000);
+}
+
+async function traiter() {
+  liberer();
+  const type = (enr && enr.mimeType) || "audio/webm";
+  const blob = new Blob(morceaux, { type: type });
+  if (blob.size < 1500) { etatMic("repos"); setMsg("Je n'ai rien entendu. Réessayez."); return; }
+  etatMic("transcription");
+  setMsg("Transcription…", true);
+  try {
+    const b64 = await versBase64(blob);
+    const r = await fetch("/api/transcrire", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ audio: b64, type: type })
+    });
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    if (!d.texte) {
+      setMsg("Je n'ai rien compris. Réessayez.");
+    } else {
+      const base = $("texte").value.trim();
+      $("texte").value = ((base ? base + " " : "") + d.texte).slice(0, 1000);
+      setMsg("");
+    }
+  } catch (e) {
+    setMsg("Transcription indisponible. Écrivez le message.");
+  }
+  etatMic("repos");
+}
+
+if (PEUT) {
   mic.hidden = false;
   mic.onclick = function () {
-    if (ecoute) { rec.stop(); return; }
-    erreurMic = false;
-    rec = new SR();
-    rec.lang = "fr-FR";
-    rec.interimResults = true;
-    rec.continuous = false;
-    base = $("texte").value.trim();
-    rec.onstart = function () { etatMic(true); setMsg("Je vous écoute…", true); };
-    rec.onresult = function (e) {
-      let t = "";
-      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
-      $("texte").value = ((base ? base + " " : "") + t.trim()).slice(0, 1000);
-    };
-    rec.onerror = function (e) {
-      erreurMic = true;
-      const m = {
-        "not-allowed": "Micro refusé. Autorisez-le dans le navigateur.",
-        "service-not-allowed": "Micro refusé. Autorisez-le dans le navigateur.",
-        "no-speech": "Je n'ai rien entendu. Réessayez.",
-        "network": "Dictée indisponible sans connexion.",
-        "audio-capture": "Aucun micro détecté."
-      };
-      setMsg(m[e.error] || "Dictée impossible. Écrivez le message.");
-    };
-    rec.onend = function () {
-      etatMic(false);
-      if (!erreurMic) setMsg("");
-    };
-    try { rec.start(); } catch (e) { etatMic(false); }
+    if (etat === "ecoute") arreter();
+    else if (etat === "repos") demarrer();
   };
 }
 
@@ -224,7 +278,7 @@ async function charger() {
 
 /* ---------- Envoi ---------- */
 $("envoyer").onclick = async function () {
-  if (ecoute && rec) rec.stop();
+  if (etat !== "repos") { setMsg("Terminez d'abord la dictée.", true); return; }
   const btn = $("envoyer");
   const texte = $("texte").value.trim();
   if (texte.length < 10) { setMsg("Écrivez au moins une phrase."); return; }
@@ -233,7 +287,7 @@ $("envoyer").onclick = async function () {
   setMsg("");
   try {
     const a = await analyser(texte);
-    const rec2 = {
+    const rec = {
       type: a ? a.type : "Autre",
       lieu: a ? a.point_eau : "inconnu",
       description: texte,
@@ -242,12 +296,12 @@ $("envoyer").onclick = async function () {
     const r = await fetch(BASE, {
       method: "POST",
       headers: Object.assign({ "Prefer": "return=minimal" }, HEAD),
-      body: JSON.stringify(rec2)
+      body: JSON.stringify(rec)
     });
     if (!r.ok) throw new Error(r.status);
-    $("r-type").textContent = rec2.type;
-    $("r-urg").textContent = rec2.urgence ? cap(rec2.urgence) : "À confirmer";
-    $("r-lieu").textContent = rec2.lieu;
+    $("r-type").textContent = rec.type;
+    $("r-urg").textContent = rec.urgence ? cap(rec.urgence) : "À confirmer";
+    $("r-lieu").textContent = rec.lieu;
     $("r-note").hidden = !!a;
     $("form").hidden = true;
     $("done").hidden = false;
