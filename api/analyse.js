@@ -66,7 +66,7 @@ module.exports = async function handler(req, res) {
   if (!principal) return res.status(500).json({ erreur: "GEMINI_MODEL manquant sur Vercel" });
   const secours = process.env.GEMINI_MODEL_SECOURS;
   const modeles = secours && secours !== principal ? [principal, secours] : [principal];
-  const delai = modeles.length > 1 ? 4500 : 8500;
+  const delai = modeles.length > 1 ? 12000 : 25000;
   const echecs = [];
 
   for (const model of modeles) {
