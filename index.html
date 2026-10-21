@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Aqua-Eye</title>
+<style>
+:root{--bg:#F5F5F7;--card:#fff;--tx:#1D1D1F;--tx2:#6E6E73;--ac:#0A66FF;--btn:#0A66FF;--ln:rgba(0,0,0,.08);--sh:0 2px 12px rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1C1C1E;--tx:#F5F5F7;--tx2:#A1A1A6;--ac:#4C8DFF;--ln:rgba(255,255,255,.12);--sh:none}}
+*{box-sizing:border-box;margin:0}
+body{font:400 16px/1.5 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+main{max-width:480px;margin:0 auto;padding:16px 20px calc(32px + env(safe-area-inset-bottom))}
+.brand{display:flex;align-items:center;gap:8px;min-height:44px;font-size:18px;font-weight:600;color:var(--ac)}
+.drop{position:relative;width:24px;height:24px}
+.drop svg{width:24px;height:24px;fill:var(--ac)}
+.drop::after{content:"";position:absolute;left:6px;bottom:1px;width:12px;height:5px;border:2px solid var(--ac);border-radius:50%;opacity:0;animation:ring 3s ease-out infinite}
+@keyframes ring{0%{transform:scale(.4);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+h1{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.02em;margin:32px 0 8px}
+.sub{color:var(--tx2);margin-bottom:32px}
+.cta{display:flex;align-items:center;justify-content:center;min-height:64px;border-radius:16px;background:var(--btn);color:#fff;font-size:18px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(10,102,255,.28);transition:transform .15s,opacity .15s}
+.cta:active{transform:scale(.98);opacity:.9}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--sh);margin-top:24px}
+.tip-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tip-h b{font-weight:600}
+.pause{min-width:44px;min-height:44px;padding:0 8px;border:0;border-radius:12px;background:transparent;color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
+.tip-t{min-height:72px;transition:opacity .3s}
+h2{font-size:18px;font-weight:600;margin:32px 0 8px}
+.pt{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:8px 0}
+.pt+.pt{border-top:1px solid var(--ln)}
+.sc{font-weight:600;color:var(--ac);white-space:nowrap}
+.sk{height:16px;border-radius:8px;background:var(--ln);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.4}}
+.msg{color:var(--tx2);padding:8px 0}
+.retry{min-height:44px;padding:0 16px;margin-top:8px;border:0;border-radius:12px;background:var(--ln);color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
+.link{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:16px;color:var(--ac);font-weight:600;text-decoration:none}
+a:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<div class="brand"><span class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.6 4.6 6.5 8 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10.5 8.4 7.100 12 2.500z"/></svg></span>Aqua-Eye</div>
+<h1>Une panne d'eau ? Dites-le.</h1>
+<p class="sub">Votre signalement aide à réparer plus vite.</p>
+<a class="cta" href="signaler.html">Signaler une panne</a>
+
+<section class="card" aria-live="polite">
+<div class="tip-h"><b id="tipT">Inondation : que faire ?</b><button class="pause" id="pz" type="button">Pause</button></div>
+<p class="tip-t" id="tipP"></p>
+</section>
+
+<h2>Points critiques</h2>
+<div id="liste"><div class="sk"></div></div>
+<a class="link" href="dashboard.html">Voir le tableau de bord</a>
+</main>
+
+<script>
+var URL_SB="COLLE_ICI_URL",CLE="COLLE_ICI_CLE_PUBLIQUE";
+var conseils=[
+"Évitez de marcher ou de conduire dans l'eau de crue.",
+"Ne buvez pas l'eau d'un puits ou d'un forage touché par l'inondation sans l'avoir fait bouillir.",
+"Mettez vos papiers et vos appareils électriques en hauteur.",
+"Gardez de l'eau potable en réserve dans des récipients fermés.",
+"Suivez les consignes des autorités locales."
+];
+var i=0,pause=false,tp=document.getElementById("tipP"),pz=document.getElementById("pz");
+function montre(){tp.style.opacity=0;setTimeout(function(){tp.textContent=conseils[i];tp.style.opacity=1},300)}
+tp.textContent=conseils[0];
+setInterval(function(){if(!pause){i=(i+1)%conseils.length;montre()}},6000);
+pz.onclick=function(){pause=!pause;pz.textContent=pause?"Lire":"Pause"};
+
+var L=document.getElementById("liste");
+function msg(t,r){L.innerHTML="";var p=document.createElement("p");p.className="msg";p.textContent=t;L.appendChild(p);if(r){var b=document.createElement("button");b.className="retry";b.type="button";b.textContent="Réessayer";b.onclick=charge;L.appendChild(b)}}
+function charge(){
+L.innerHTML='<div class="sk"></div>';
+var c=new AbortController(),t=setTimeout(function(){c.abort()},8000);
+fetch(URL_SB+"/rest/v1/scores_points_eau?select=*",{headers:{apikey:CLE,Authorization:"Bearer "+CLE},signal:c.signal})
+.then(function(r){if(!r.ok)throw 0;return r.json()})
+.then(function(d){
+clearTimeout(t);
+d=d.filter(function(p){return typeof p.score==="number"}).sort(function(a,b){return a.score-b.score}).slice(0,3);
+if(!d.length){msg("Aucun signalement pour le moment.");return}
+L.innerHTML="";
+d.forEach(function(p){
+var e=document.createElement("div"),n=document.createElement("span"),s=document.createElement("span");
+e.className="pt";s.className="sc";
+n.textContent=p.lieu||p.point_eau||p.nom||"Point d'eau";
+s.textContent=Math.round(p.score)+"/100";
+e.appendChild(n);e.appendChild(s);L.appendChild(e)
+})
+})
+.catch(function(){clearTimeout(t);msg("Impossible de charger les données.",true)})
+}
+charge();
+</script>
+</body>
+</html>
