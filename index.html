@@ -18,15 +18,23 @@ h1{font-size:28px;font-weight:600;line-height:1.2;margin:0 0 8px}
 h2{font-size:17px;font-weight:600;margin:40px 0 8px}
 .hint,.meta{font-size:16px;color:var(--muted)}
 .hint{margin:0 0 16px}
-textarea{display:block;width:100%;min-height:160px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);font:inherit;resize:none;box-shadow:var(--shadow);transition:border-color .2s}
+.field{position:relative}
+textarea{display:block;width:100%;min-height:160px;padding:16px 16px 72px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--text);font:inherit;resize:none;box-shadow:var(--shadow);transition:border-color .2s}
 textarea:focus{outline:2px solid var(--accent);outline-offset:2px}
-button{font:inherit;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s}
+button{font:inherit;font-weight:600;cursor:pointer;transition:transform .15s,opacity .15s,background-color .15s}
 button:active{transform:scale(.98)}
+.mic{position:absolute;right:12px;bottom:12px;width:48px;height:48px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--card);color:var(--accent);display:grid;place-items:center}
+.mic svg{width:24px;height:24px;fill:currentColor}
+.mic:active{transform:scale(.94)}
+.mic.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.mic.on::after{content:"";position:absolute;inset:-4px;border:2px solid var(--accent);border-radius:50%;animation:listen 1.3s ease-out infinite}
+@keyframes listen{0%{transform:scale(.9);opacity:.8}100%{transform:scale(1.5);opacity:0}}
 .primary{display:block;width:100%;min-height:52px;margin-top:16px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent)}
 .primary:disabled{opacity:.6;cursor:default}
 .ghost{display:block;width:100%;min-height:52px;margin-top:16px;border:0;border-radius:14px;background:transparent;color:var(--accent)}
 .link{min-height:44px;padding:0 8px;border:0;background:transparent;color:var(--accent)}
 #msg{min-height:24px;margin:12px 0 0;font-size:16px;color:var(--alert)}
+#msg.info{color:var(--muted)}
 .card{background:var(--card);border-radius:16px;padding:24px 20px;box-shadow:var(--shadow)}
 .drop{position:relative;width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center}
 .drop svg{width:32px;height:32px;fill:var(--accent);z-index:1;animation:pop .3s ease-out}
@@ -56,9 +64,14 @@ button:active{transform:scale(.98)}
 
 <section id="form">
 <h1>Que se passe-t-il ?</h1>
-<p class="hint">Décrivez le lieu et le problème. Une phrase suffit.</p>
+<p class="hint">Écrivez ou dictez. Une phrase suffit.</p>
 <label for="texte" hidden>Votre signalement</label>
+<div class="field">
 <textarea id="texte" maxlength="1000" placeholder="Ex. : La pompe du quartier Godomey est en panne depuis 3 jours."></textarea>
+<button id="mic" class="mic" type="button" aria-label="Dicter le signalement" aria-pressed="false" hidden>
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
+</button>
+</div>
 <button id="envoyer" class="primary">Envoyer</button>
 <p id="msg" role="status" aria-live="polite"></p>
 </section>
@@ -85,7 +98,11 @@ const KEY = "sb_publishable_TqMSG-00c_6l28P3qVMlOA_dQiAuaxP";
 const HEAD = { "apikey": KEY, "Content-Type": "application/json" };
 const $ = function (id) { return document.getElementById(id); };
 
-function setMsg(t) { $("msg").textContent = t || ""; }
+function setMsg(t, info) {
+  const m = $("msg");
+  m.textContent = t || "";
+  m.className = info ? "info" : "";
+}
 
 function pause(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
@@ -106,6 +123,54 @@ async function analyser(texte) {
 
 function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ""; }
 
+/* ---------- Dictée vocale ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const mic = $("mic");
+let rec = null, ecoute = false, base = "", erreurMic = false;
+
+function etatMic(on) {
+  ecoute = on;
+  mic.classList.toggle("on", on);
+  mic.setAttribute("aria-pressed", on ? "true" : "false");
+  mic.setAttribute("aria-label", on ? "Arrêter la dictée" : "Dicter le signalement");
+}
+
+if (SR) {
+  mic.hidden = false;
+  mic.onclick = function () {
+    if (ecoute) { rec.stop(); return; }
+    erreurMic = false;
+    rec = new SR();
+    rec.lang = "fr-FR";
+    rec.interimResults = true;
+    rec.continuous = false;
+    base = $("texte").value.trim();
+    rec.onstart = function () { etatMic(true); setMsg("Je vous écoute…", true); };
+    rec.onresult = function (e) {
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      $("texte").value = ((base ? base + " " : "") + t.trim()).slice(0, 1000);
+    };
+    rec.onerror = function (e) {
+      erreurMic = true;
+      const m = {
+        "not-allowed": "Micro refusé. Autorisez-le dans le navigateur.",
+        "service-not-allowed": "Micro refusé. Autorisez-le dans le navigateur.",
+        "no-speech": "Je n'ai rien entendu. Réessayez.",
+        "network": "Dictée indisponible sans connexion.",
+        "audio-capture": "Aucun micro détecté."
+      };
+      setMsg(m[e.error] || "Dictée impossible. Écrivez le message.");
+    };
+    rec.onend = function () {
+      etatMic(false);
+      if (!erreurMic) setMsg("");
+    };
+    try { rec.start(); } catch (e) { etatMic(false); }
+  };
+}
+
+/* ---------- Liste des signalements ---------- */
 async function charger() {
   const liste = $("liste");
   liste.textContent = "";
@@ -157,7 +222,9 @@ async function charger() {
   }
 }
 
+/* ---------- Envoi ---------- */
 $("envoyer").onclick = async function () {
+  if (ecoute && rec) rec.stop();
   const btn = $("envoyer");
   const texte = $("texte").value.trim();
   if (texte.length < 10) { setMsg("Écrivez au moins une phrase."); return; }
@@ -166,7 +233,7 @@ $("envoyer").onclick = async function () {
   setMsg("");
   try {
     const a = await analyser(texte);
-    const rec = {
+    const rec2 = {
       type: a ? a.type : "Autre",
       lieu: a ? a.point_eau : "inconnu",
       description: texte,
@@ -175,12 +242,12 @@ $("envoyer").onclick = async function () {
     const r = await fetch(BASE, {
       method: "POST",
       headers: Object.assign({ "Prefer": "return=minimal" }, HEAD),
-      body: JSON.stringify(rec)
+      body: JSON.stringify(rec2)
     });
     if (!r.ok) throw new Error(r.status);
-    $("r-type").textContent = rec.type;
-    $("r-urg").textContent = rec.urgence ? cap(rec.urgence) : "À confirmer";
-    $("r-lieu").textContent = rec.lieu;
+    $("r-type").textContent = rec2.type;
+    $("r-urg").textContent = rec2.urgence ? cap(rec2.urgence) : "À confirmer";
+    $("r-lieu").textContent = rec2.lieu;
     $("r-note").hidden = !!a;
     $("form").hidden = true;
     $("done").hidden = false;
