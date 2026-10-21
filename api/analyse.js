@@ -31,6 +31,7 @@ async function appeler(model, key, texte, delai) {
         contents: [{ role: "user", parts: [{ text: texte }] }],
         generationConfig: {
           temperature: 0,
+        thinkingConfig: { thinkingLevel: "low" },
           responseMimeType: "application/json",
           responseSchema: {
             type: "OBJECT",
