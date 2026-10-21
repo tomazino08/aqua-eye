@@ -2,7 +2,6 @@ const TYPES = ["Panne de pompe", "Eau polluée", "Fuite", "Pénurie d'eau", "Aut
 const URGENCES = ["faible", "moyenne", "haute"];
 const SECOURS = "gemini-2.5-flash";
 
-// Limite d'appels : 20 par adresse IP et par 10 minutes (par instance serveur)
 const FENETRE_MS = 10 * 60 * 1000;
 const MAX_APPELS = 20;
 const compteurs = new Map();
@@ -23,7 +22,7 @@ async function appeler(model, key, texte) {
     {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      signal: AbortSignal.timeout(4500),
+      signal: AbortSignal.timeout(5000),
       body: JSON.stringify({
         systemInstruction: {
           parts: [{
@@ -66,6 +65,7 @@ module.exports = async function handler(req, res) {
 
   const principal = process.env.GEMINI_MODEL || SECOURS;
   const modeles = principal === SECOURS ? [SECOURS] : [principal, SECOURS];
+  const echecs = [];
 
   for (const model of modeles) {
     try {
@@ -76,8 +76,10 @@ module.exports = async function handler(req, res) {
         point_eau: String(out.point_eau || "inconnu").slice(0, 200)
       });
     } catch (e) {
-      // on passe au modèle suivant
+      const msg = model + " : " + (e && e.message ? e.message : "erreur");
+      echecs.push(msg);
+      console.error("Analyse échouée", msg);
     }
   }
-  return res.status(503).json({ erreur: "Analyse indisponible, réessaie." });
+  return res.status(503).json({ erreur: "Analyse indisponible", detail: echecs });
 };
