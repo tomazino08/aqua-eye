@@ -6,68 +6,94 @@
 <meta name="color-scheme" content="light dark">
 <title>Aqua-Eye</title>
 <style>
-:root{--bg:#F5F5F7;--card:#fff;--tx:#1D1D1F;--tx2:#6E6E73;--ac:#0A66FF;--btn:#0A66FF;--ln:rgba(0,0,0,.08);--sh:0 2px 12px rgba(0,0,0,.06)}
+:root{--bg:#F5F5F7;--card:#fff;--tx:#1D1D1F;--tx2:#6E6E73;--ac:#0A66FF;--ln:rgba(0,0,0,.08);--sh:0 2px 12px rgba(0,0,0,.06)}
 @media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1C1C1E;--tx:#F5F5F7;--tx2:#A1A1A6;--ac:#4C8DFF;--ln:rgba(255,255,255,.12);--sh:none}}
 *{box-sizing:border-box;margin:0}
-body{font:400 16px/1.5 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
+body{font:400 16px/1.5 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
+body::before{content:"";position:absolute;inset:0 0 auto 0;height:460px;z-index:-1;pointer-events:none;background:repeating-radial-gradient(circle at 88% -40px,transparent 0 36px,rgba(10,102,255,.1) 37px 38px),radial-gradient(ellipse at 50% 0,rgba(10,102,255,.16),transparent 70%);-webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
 main{max-width:480px;margin:0 auto;padding:16px 20px calc(32px + env(safe-area-inset-bottom))}
 .brand{display:flex;align-items:center;gap:8px;min-height:44px;font-size:18px;font-weight:600;color:var(--ac)}
 .drop{position:relative;width:24px;height:24px}
 .drop svg{width:24px;height:24px;fill:var(--ac)}
 .drop::after{content:"";position:absolute;left:6px;bottom:1px;width:12px;height:5px;border:2px solid var(--ac);border-radius:50%;opacity:0;animation:ring 3s ease-out infinite}
 @keyframes ring{0%{transform:scale(.4);opacity:.8}100%{transform:scale(2.2);opacity:0}}
-h1{font-size:28px;line-height:1.2;font-weight:600;letter-spacing:-.02em;margin:32px 0 8px}
+h1{font-size:34px;line-height:1.1;font-weight:600;letter-spacing:-.03em;margin:48px 0 8px}
 .sub{color:var(--tx2);margin-bottom:32px}
-.cta{display:flex;align-items:center;justify-content:center;min-height:64px;border-radius:16px;background:var(--btn);color:#fff;font-size:18px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(10,102,255,.28);transition:transform .15s,opacity .15s}
+.cta{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:72px;border-radius:16px;background:var(--ac);color:#fff;font-size:18px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(10,102,255,.28);transition:transform .15s,opacity .15s}
 .cta:active{transform:scale(.98);opacity:.9}
-.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--sh);margin-top:24px}
+.cta::after{content:"";position:absolute;top:0;bottom:0;left:-50%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent);animation:shine 4s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-50%}100%{left:130%}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:32px}
+.st{background:var(--card);border-radius:16px;padding:16px 12px;box-shadow:var(--sh)}
+.st b{display:block;font-size:34px;line-height:1.1;font-weight:600;letter-spacing:-.03em;color:var(--ac);font-variant-numeric:tabular-nums}
+.st span{color:var(--tx2)}
+.card{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--sh);margin-top:24px}
 .tip-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.tip-h b{font-weight:600}
+.tip-h b,.live{display:flex;align-items:center;gap:8px;font-weight:600}
+.tip-h b::before,.live::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ac);animation:pulse 1.6s ease-in-out infinite}
 .pause{min-width:44px;min-height:44px;padding:0 8px;border:0;border-radius:12px;background:transparent;color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
 .tip-t{min-height:72px;transition:opacity .3s}
 h2{font-size:18px;font-weight:600;margin:32px 0 8px}
-.pt{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;padding:8px 0}
+.live{font-size:18px}
+ol{list-style:none;padding:0}
+li{display:flex;gap:12px;align-items:center;min-height:56px}
+li+li{border-top:1px solid var(--ln)}
+li i{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(10,102,255,.1);color:var(--ac);font-style:normal;font-weight:600}
+#liste{background:var(--card);border-radius:16px;padding:8px 16px;box-shadow:var(--sh)}
+.pt{padding:12px 0}
 .pt+.pt{border-top:1px solid var(--ln)}
-.sc{font-weight:600;color:var(--ac);white-space:nowrap}
-.sk{height:16px;border-radius:8px;background:var(--ln);animation:pulse 1.2s ease-in-out infinite}
+.pt-h{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pt-h span:first-child{font-weight:600}
+.sc{padding:4px 12px;border-radius:999px;background:rgba(10,102,255,.1);color:var(--ac);font-weight:600;white-space:nowrap}
+.pt-s{color:var(--tx2)}
+.bar{height:4px;border-radius:2px;background:var(--ln);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:2px;background:var(--ac);transition:width .6s ease-out}
+.sk{height:16px;border-radius:8px;background:var(--ln);margin:16px 0;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.4}}
-.msg{color:var(--tx2);padding:8px 0}
-.retry{min-height:44px;padding:0 16px;margin-top:8px;border:0;border-radius:12px;background:var(--ln);color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
+.msg{color:var(--tx2);padding:12px 0}
+.retry{min-height:44px;padding:0 16px;margin-bottom:8px;border:0;border-radius:12px;background:var(--ln);color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
 .link{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:16px;color:var(--ac);font-weight:600;text-decoration:none}
 a:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-body{position:relative;overflow-x:hidden}
-body::before{content:"";position:absolute;inset:0 0 auto 0;height:440px;z-index:-1;pointer-events:none;background:repeating-radial-gradient(circle at 88% -40px,transparent 0 36px,rgba(10,102,255,.1) 37px 38px),radial-gradient(ellipse at 50% 0,rgba(10,102,255,.16),transparent 70%);-webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
-h1{font-size:34px;line-height:1.1;letter-spacing:-.03em;margin-top:48px}
-.cta{position:relative;overflow:hidden;min-height:72px}
-.cta::after{content:"";position:absolute;top:0;bottom:0;left:-50%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent);animation:shine 4s ease-in-out infinite}
-@keyframes shine{0%,60%{left:-50%}100%{left:130%}}
-.card{margin-top:32px;padding:20px}
-.tip-h b{display:flex;align-items:center;gap:8px}
-.tip-h b::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ac);animation:pulse 1.6s ease-in-out infinite}
-#liste{background:var(--card);border-radius:16px;padding:8px 16px;box-shadow:var(--sh)}
-.sc{padding:4px 12px;border-radius:999px;background:rgba(10,102,255,.08)}
 </style>
 </head>
 <body>
 <main>
-<div class="brand"><span class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.6 4.6 6.5 8 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10.5 8.4 7.100 12 2.500z"/></svg></span>Aqua-Eye</div>
+<div class="brand"><span class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.6 4.6 6.5 8 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10.5 8.4 7.1 12 2.5z"/></svg></span>Aqua-Eye</div>
 <h1>Une panne d'eau ? Dites-le.</h1>
 <p class="sub">Votre signalement aide à réparer plus vite.</p>
 <a class="cta" href="signaler.html">Signaler une panne</a>
 
+<div class="stats" aria-live="polite">
+<div class="st"><b id="n1">–</b><span>Signalés</span></div>
+<div class="st"><b id="n2">–</b><span>Points</span></div>
+<div class="st"><b id="n3">–</b><span>Critiques</span></div>
+</div>
+
+<h2>Comment ça marche</h2>
+<div class="card" style="margin-top:0;padding:4px 20px">
+<ol>
+<li><i>1</i>Signalez par texte, voix ou photo</li>
+<li><i>2</i>L'IA classe l'urgence</li>
+<li><i>3</i>Les équipes interviennent en priorité</li>
+</ol>
+</div>
+
 <section class="card" aria-live="polite">
-<div class="tip-h"><b id="tipT">Inondation : que faire ?</b><button class="pause" id="pz" type="button">Pause</button></div>
+<div class="tip-h"><b>Inondation : que faire ?</b><button class="pause" id="pz" type="button">Pause</button></div>
 <p class="tip-t" id="tipP"></p>
 </section>
 
-<h2>Points critiques</h2>
+<h2 class="live">Points critiques</h2>
 <div id="liste"><div class="sk"></div></div>
 <a class="link" href="dashboard.html">Voir le tableau de bord</a>
 </main>
 
 <script>
 var URL_SB="https://vvnqfvpswughneqjyvhw.supabase.co",CLE="sb_publishable_TqMSG-00c_6l28P3qVMlOA_dQiAuaxP";
+var H={apikey:CLE,Authorization:"Bearer "+CLE};
+var reduit=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
 var conseils=[
 "Évitez de marcher ou de conduire dans l'eau de crue.",
 "Ne buvez pas l'eau d'un puits ou d'un forage touché par l'inondation sans l'avoir fait bouillir.",
@@ -81,29 +107,58 @@ tp.textContent=conseils[0];
 setInterval(function(){if(!pause){i=(i+1)%conseils.length;montre()}},6000);
 pz.onclick=function(){pause=!pause;pz.textContent=pause?"Lire":"Pause"};
 
+function compte(id,n){
+var el=document.getElementById(id);
+if(reduit||n===0){el.textContent=n;return}
+var d=700,t0=null;
+function f(t){if(!t0)t0=t;var p=Math.min((t-t0)/d,1);el.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)}
+requestAnimationFrame(f)
+}
+
+function nbSignalements(){
+fetch(URL_SB+"/rest/v1/signalements?select=*",{headers:{apikey:CLE,Authorization:"Bearer "+CLE,Prefer:"count=exact",Range:"0-0"}})
+.then(function(r){var c=r.headers.get("Content-Range");var n=c?parseInt(c.split("/")[1],10):NaN;if(!isNaN(n))compte("n1",n)})
+.catch(function(){})
+}
+
 var L=document.getElementById("liste");
-function msg(t,r){L.innerHTML="";var p=document.createElement("p");p.className="msg";p.textContent=t;L.appendChild(p);if(r){var b=document.createElement("button");b.className="retry";b.type="button";b.textContent="Réessayer";b.onclick=charge;L.appendChild(b)}}
+function msg(t,r){
+L.innerHTML="";
+var p=document.createElement("p");p.className="msg";p.textContent=t;L.appendChild(p);
+if(r){var b=document.createElement("button");b.className="retry";b.type="button";b.textContent="Réessayer";b.onclick=charge;L.appendChild(b)}
+}
+function etat(s){return s<60?"Critique":s<85?"À surveiller":"Fiable"}
+
 function charge(){
-L.innerHTML='<div class="sk"></div>';
+L.innerHTML='<div class="sk"></div><div class="sk"></div>';
 var c=new AbortController(),t=setTimeout(function(){c.abort()},8000);
-fetch(URL_SB+"/rest/v1/scores_points_eau?select=*",{headers:{apikey:CLE,Authorization:"Bearer "+CLE},signal:c.signal})
+fetch(URL_SB+"/rest/v1/scores_points_eau?select=*",{headers:H,signal:c.signal})
 .then(function(r){if(!r.ok)throw 0;return r.json()})
 .then(function(d){
 clearTimeout(t);
-d=d.filter(function(p){return typeof p.score==="number"}).sort(function(a,b){return a.score-b.score}).slice(0,3);
+d=d.filter(function(p){return typeof p.score==="number"}).sort(function(a,b){return a.score-b.score});
+compte("n2",d.length);
+compte("n3",d.filter(function(p){return p.score<60}).length);
 if(!d.length){msg("Aucun signalement pour le moment.");return}
 L.innerHTML="";
-d.forEach(function(p){
-var e=document.createElement("div"),n=document.createElement("span"),s=document.createElement("span");
-e.className="pt";s.className="sc";
-n.textContent=p.lieu||p.point_eau||p.nom||"Point d'eau";
-s.textContent=Math.round(p.score)+"/100";
-e.appendChild(n);e.appendChild(s);L.appendChild(e)
+d.slice(0,3).forEach(function(p){
+var s=Math.round(p.score);
+var e=document.createElement("div");e.className="pt";
+var h=document.createElement("div");h.className="pt-h";
+var n=document.createElement("span");n.textContent=p.lieu||p.point_eau||p.nom||"Point d'eau";
+var sc=document.createElement("span");sc.className="sc";sc.textContent=s+"/100";
+h.appendChild(n);h.appendChild(sc);
+var st=document.createElement("div");st.className="pt-s";st.textContent=etat(s);
+var b=document.createElement("div");b.className="bar";
+var f=document.createElement("i");b.appendChild(f);
+e.appendChild(h);e.appendChild(st);e.appendChild(b);L.appendChild(e);
+setTimeout(function(){f.style.width=Math.max(0,Math.min(100,s))+"%"},50)
 })
 })
 .catch(function(){clearTimeout(t);msg("Impossible de charger les données.",true)})
 }
 charge();
+nbSignalements();
 </script>
 </body>
 </html>
