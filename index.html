@@ -6,11 +6,11 @@
 <meta name="color-scheme" content="light dark">
 <title>Aqua-Eye</title>
 <style>
-:root{--bg:#F5F5F7;--card:#fff;--tx:#1D1D1F;--tx2:#6E6E73;--ac:#0A66FF;--ln:rgba(0,0,0,.08);--sh:0 2px 12px rgba(0,0,0,.06)}
-@media (prefers-color-scheme:dark){:root{--bg:#000;--card:#1C1C1E;--tx:#F5F5F7;--tx2:#A1A1A6;--ac:#4C8DFF;--ln:rgba(255,255,255,.12);--sh:none}}
+:root{--bg:#F5F5F7;--card:#fff;--tx:#1D1D1F;--tx2:#6E6E73;--ac:#0A66FF;--ln:rgba(0,0,0,.08);--sh:0 2px 12px rgba(0,0,0,.06);--ring:rgba(10,102,255,.12);--glow:rgba(10,102,255,.16);--ctash:0 4px 16px rgba(10,102,255,.28);--tint:rgba(10,102,255,.1);--txsh:none}
+@media (prefers-color-scheme:dark){:root{--bg:#050A14;--card:#0E1828;--tx:#F2F6FC;--tx2:#9FB0C8;--ac:#5B9BFF;--ln:rgba(140,180,255,.16);--sh:inset 0 1px 0 rgba(255,255,255,.05);--ring:rgba(91,155,255,.24);--glow:rgba(10,102,255,.4);--ctash:inset 0 1px 0 rgba(255,255,255,.2),0 8px 32px rgba(10,102,255,.5);--tint:rgba(91,155,255,.16);--txsh:0 0 24px rgba(91,155,255,.5)}}
 *{box-sizing:border-box;margin:0}
 body{font:400 16px/1.5 -apple-system,"SF Pro Text",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden}
-body::before{content:"";position:absolute;inset:0 0 auto 0;height:460px;z-index:-1;pointer-events:none;background:repeating-radial-gradient(circle at 88% -40px,transparent 0 36px,rgba(10,102,255,.1) 37px 38px),radial-gradient(ellipse at 50% 0,rgba(10,102,255,.16),transparent 70%);-webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
+body::before{content:"";position:absolute;inset:0 0 auto 0;height:560px;z-index:-1;pointer-events:none;background:repeating-radial-gradient(circle at 88% -40px,transparent 0 36px,var(--ring) 37px 38px),repeating-radial-gradient(circle at 4% 320px,transparent 0 44px,var(--ring) 45px 46px),radial-gradient(ellipse at 50% 0,var(--glow),transparent 70%);-webkit-mask-image:linear-gradient(#000 45%,transparent);mask-image:linear-gradient(#000 45%,transparent)}
 main{max-width:480px;margin:0 auto;padding:16px 20px calc(32px + env(safe-area-inset-bottom))}
 .brand{display:flex;align-items:center;gap:8px;min-height:44px;font-size:18px;font-weight:600;color:var(--ac)}
 .drop{position:relative;width:24px;height:24px}
@@ -19,46 +19,76 @@ main{max-width:480px;margin:0 auto;padding:16px 20px calc(32px + env(safe-area-i
 @keyframes ring{0%{transform:scale(.4);opacity:.8}100%{transform:scale(2.2);opacity:0}}
 h1{font-size:34px;line-height:1.1;font-weight:600;letter-spacing:-.03em;margin:48px 0 8px}
 .sub{color:var(--tx2);margin-bottom:32px}
-.cta{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:72px;border-radius:16px;background:var(--ac);color:#fff;font-size:18px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(10,102,255,.28);transition:transform .15s,opacity .15s}
+.cta{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:72px;border-radius:16px;background:#0A66FF;color:#fff;font-size:18px;font-weight:600;text-decoration:none;box-shadow:var(--ctash);transition:transform .15s,opacity .15s}
 .cta:active{transform:scale(.98);opacity:.9}
 .cta::after{content:"";position:absolute;top:0;bottom:0;left:-50%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.3),transparent);animation:shine 4s ease-in-out infinite}
 @keyframes shine{0%,60%{left:-50%}100%{left:130%}}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:32px}
-.st{background:var(--card);border-radius:16px;padding:16px 12px;box-shadow:var(--sh)}
-.st b{display:block;font-size:34px;line-height:1.1;font-weight:600;letter-spacing:-.03em;color:var(--ac);font-variant-numeric:tabular-nums}
+.st,.card,#liste,.bx{background:var(--card);border:1px solid var(--ln);border-radius:16px;box-shadow:var(--sh)}
+.st{padding:16px 12px}
+.st b{display:block;font-size:34px;line-height:1.1;font-weight:600;letter-spacing:-.03em;color:var(--ac);font-variant-numeric:tabular-nums;text-shadow:var(--txsh)}
 .st span{color:var(--tx2)}
-.card{background:var(--card);border-radius:16px;padding:20px;box-shadow:var(--sh);margin-top:24px}
-.tip-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.tip-h b,.live{display:flex;align-items:center;gap:8px;font-weight:600}
-.tip-h b::before,.live::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ac);animation:pulse 1.6s ease-in-out infinite}
-.pause{min-width:44px;min-height:44px;padding:0 8px;border:0;border-radius:12px;background:transparent;color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
-.tip-t{min-height:72px;transition:opacity .3s}
+.card{padding:4px 20px;margin-top:0}
 h2{font-size:18px;font-weight:600;margin:32px 0 8px}
-.live{font-size:18px}
-ol{list-style:none;padding:0}
-li{display:flex;gap:12px;align-items:center;min-height:56px}
-li+li{border-top:1px solid var(--ln)}
-li i{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(10,102,255,.1);color:var(--ac);font-style:normal;font-weight:600}
-#liste{background:var(--card);border-radius:16px;padding:8px 16px;box-shadow:var(--sh)}
+.hd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:32px 0 8px}
+.hd h2{margin:0}
+.live{display:flex;align-items:center;gap:8px}
+.live::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ac);box-shadow:0 0 12px var(--ac);animation:pulse 1.6s ease-in-out infinite}
+.pause{min-width:44px;min-height:44px;padding:0 8px;border:0;border-radius:12px;background:transparent;color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
+ol,ul{list-style:none;padding:0}
+.how li{display:flex;gap:12px;align-items:center;min-height:56px}
+.how li+li,.bx li+li{border-top:1px solid var(--ln)}
+.how i{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--tint);color:var(--ac);font-style:normal;font-weight:600}
+.mq{overflow:hidden;margin:0 -20px 8px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.tr{display:flex;width:max-content;padding:4px 0;animation:slide 40s linear infinite}
+.mq.rev .tr{animation-direction:reverse}
+.mq.p .tr,.mq:hover .tr,.mq:focus-within .tr{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+.ch{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 16px;margin-right:8px;border:1px solid var(--ln);border-radius:16px;background:var(--card);box-shadow:var(--sh);color:var(--tx);font:inherit;white-space:nowrap;text-decoration:none;cursor:pointer;transition:transform .15s}
+.ch::after{content:"›";color:var(--ac);font-weight:600}
+.ch:active{transform:scale(.97)}
+.ch.sg{background:#0A66FF;color:#fff;border-color:transparent;font-weight:600}
+.ch.sg::after{color:#fff}
+#liste{padding:8px 16px}
 .pt{padding:12px 0}
 .pt+.pt{border-top:1px solid var(--ln)}
 .pt-h{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .pt-h span:first-child{font-weight:600}
-.sc{padding:4px 12px;border-radius:999px;background:rgba(10,102,255,.1);color:var(--ac);font-weight:600;white-space:nowrap}
+.sc{padding:4px 12px;border-radius:999px;background:var(--tint);color:var(--ac);font-weight:600;white-space:nowrap}
 .pt-s{color:var(--tx2)}
 .bar{height:4px;border-radius:2px;background:var(--ln);margin-top:8px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;border-radius:2px;background:var(--ac);transition:width .6s ease-out}
+.bar i{display:block;height:100%;width:0;border-radius:2px;background:var(--ac);box-shadow:0 0 8px var(--ac);transition:width .6s ease-out}
 .sk{height:16px;border-radius:8px;background:var(--ln);margin:16px 0;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.4}}
 .msg{color:var(--tx2);padding:12px 0}
 .retry{min-height:44px;padding:0 16px;margin-bottom:8px;border:0;border-radius:12px;background:var(--ln);color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
 .link{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:16px;color:var(--ac);font-weight:600;text-decoration:none}
 a:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+#det{position:fixed;inset:0;z-index:10;overflow-y:auto;background:var(--bg);transform:translateY(100%);visibility:hidden;transition:transform .3s ease,visibility 0s .3s}
+#det.on{transform:none;visibility:visible;transition:transform .3s ease,visibility 0s}
+.dw{max-width:480px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom))}
+.bk{display:inline-flex;align-items:center;min-height:44px;min-width:44px;padding:0 8px 0 0;border:0;background:transparent;color:var(--ac);font:inherit;font-weight:600;cursor:pointer}
+#dt{margin-top:16px}
+.lead{color:var(--tx2)}
+.bx{padding:0 16px}
+.bx li{display:flex;gap:12px;align-items:flex-start;padding:12px 0}
+.steps{counter-reset:s}
+.steps li{counter-increment:s}
+.steps li::before{content:counter(s);flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--tint);color:var(--ac);font-weight:600}
+.no li::before{content:"×";flex:none;display:grid;place-items:center;width:32px;height:32px;color:var(--tx2);font-weight:600}
+.note{color:var(--tx2);margin-top:16px}
+#dc{margin-top:32px}
+
+@media (prefers-reduced-motion:reduce){
+*{animation:none!important;transition:none!important}
+.mq{overflow-x:auto;-webkit-mask-image:none;mask-image:none;padding:0 20px}
+.tr [aria-hidden="true"]{display:none}
+}
 </style>
 </head>
 <body>
-<main>
+<main id="mn">
 <div class="brand"><span class="drop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.6 4.6 6.5 8 6.5 11.5a6.5 6.5 0 0 1-13 0C5.5 10.5 8.4 7.1 12 2.5z"/></svg></span>Aqua-Eye</div>
 <h1>Une panne d'eau ? Dites-le.</h1>
 <p class="sub">Votre signalement aide à réparer plus vite.</p>
@@ -71,50 +101,149 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:
 </div>
 
 <h2>Comment ça marche</h2>
-<div class="card" style="margin-top:0;padding:4px 20px">
-<ol>
+<div class="card">
+<ol class="how">
 <li><i>1</i>Signalez par texte, voix ou photo</li>
 <li><i>2</i>L'IA classe l'urgence</li>
 <li><i>3</i>Les équipes interviennent en priorité</li>
 </ol>
 </div>
 
-<section class="card" aria-live="polite">
-<div class="tip-h"><b>Inondation : que faire ?</b><button class="pause" id="pz" type="button">Pause</button></div>
-<p class="tip-t" id="tipP"></p>
-</section>
+<div class="hd"><h2 class="live">Conseils utiles</h2><button class="pause" id="pz" type="button">Pause</button></div>
+<div class="mq"><div class="tr"></div></div>
+<div class="mq rev"><div class="tr"></div></div>
 
 <h2 class="live">Points critiques</h2>
 <div id="liste"><div class="sk"></div></div>
 <a class="link" href="dashboard.html">Voir le tableau de bord</a>
 </main>
 
+<section id="det" role="dialog" aria-modal="true" aria-labelledby="dt">
+<div class="dw">
+<button class="bk" id="bk" type="button">‹ Retour</button>
+<h1 id="dt"></h1>
+<p class="lead" id="dl"></p>
+<div id="db"></div>
+<a class="cta" id="dc" href="signaler.html">Signaler une panne</a>
+</div>
+</section>
+
 <script>
 var URL_SB="https://vvnqfvpswughneqjyvhw.supabase.co",CLE="sb_publishable_TqMSG-00c_6l28P3qVMlOA_dQiAuaxP";
 var H={apikey:CLE,Authorization:"Bearer "+CLE};
 var reduit=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
 
-var conseils=[
-"Évitez de marcher ou de conduire dans l'eau de crue.",
-"Ne buvez pas l'eau d'un puits ou d'un forage touché par l'inondation sans l'avoir fait bouillir.",
-"Mettez vos papiers et vos appareils électriques en hauteur.",
-"Gardez de l'eau potable en réserve dans des récipients fermés.",
-"Suivez les consignes des autorités locales."
-];
-var i=0,pause=false,tp=document.getElementById("tipP"),pz=document.getElementById("pz");
-function montre(){tp.style.opacity=0;setTimeout(function(){tp.textContent=conseils[i];tp.style.opacity=1},300)}
-tp.textContent=conseils[0];
-setInterval(function(){if(!pause){i=(i+1)%conseils.length;montre()}},6000);
-pz.onclick=function(){pause=!pause;pz.textContent=pause?"Lire":"Pause"};
+var M={
+panne:{c:"Panne d'eau ? Signalez-la",href:"signaler.html"},
+pompe:{c:"Pompe ou forage en panne ? Signalez",href:"signaler.html"},
+inondation:{c:"Inondation : que faire ?",t:"Inondation : que faire ?",lead:"Votre sécurité passe avant vos biens. Agissez dans cet ordre.",cta:1,
+faire:["Montez à l'étage ou sur un point haut, avec les enfants et les personnes âgées.","Mettez en hauteur vos papiers, votre téléphone et vos appareils électriques.","Coupez le courant au compteur seulement si vous pouvez le faire sans toucher l'eau.","Gardez de l'eau potable dans des récipients propres et fermés.","Suivez les consignes des autorités locales et des secours."],
+eviter:["Marcher ou conduire dans l'eau de crue : trous, câbles et eaux sales sont invisibles.","Boire l'eau d'un puits ou d'un forage touché par la crue.","Laisser les enfants jouer dans l'eau stagnante."],
+al:{h:"Après la crue",l:["Faites bouillir l'eau avant de la boire.","Signalez les pompes, forages et bornes touchés.","Fièvre, diarrhée ou plaie infectée : allez au centre de santé."]}},
+"eau-trouble":{c:"Eau trouble ou qui sent mauvais",t:"Eau trouble ou qui sent mauvais",lead:"Une eau qui change d'aspect, de goût ou d'odeur peut être dangereuse. Une eau claire n'est pas toujours saine.",cta:1,
+faire:["Arrêtez de la boire et de la donner aux enfants.","Utilisez une autre source sûre si vous en avez une.","Sans autre choix : laissez l'eau reposer, filtrez-la à travers un tissu propre, puis faites-la bouillir.","Signalez le point d'eau dans Aqua-Eye, avec une photo."],
+eviter:["Goûter l'eau pour vérifier.","Utiliser cette eau pour les biberons ou les aliments crus sans l'avoir fait bouillir."],
+al:{h:"Consultez si",l:["Diarrhée, vomissements ou fièvre après avoir bu cette eau."]}},
+puits:{c:"Puits ou forage touché par la crue",t:"Puits ou forage touché par la crue",lead:"Après une inondation, l'eau d'un puits ou d'un forage peut être contaminée, même si elle paraît claire.",cta:1,
+faire:["Ne l'utilisez plus pour boire ni pour cuisiner.","Signalez le point d'eau dans Aqua-Eye.","Attendez que des techniciens ou les autorités le contrôlent et le désinfectent.","En attendant, utilisez une eau sûre ou de l'eau bouillie."],
+eviter:["Boire dès que l'eau semble redevenue claire.","Verser des produits chimiques sans conseil d'un technicien."],
+al:{h:"À savoir",l:["La contamination ne se voit pas toujours : seul un contrôle la confirme."]}},
+bouillir:{c:"Rendre l'eau potable",t:"Rendre l'eau potable",lead:"Faire bouillir est la méthode la plus simple et la plus sûre à la maison.",
+faire:["Si l'eau est trouble, filtrez-la à travers un tissu propre.","Portez-la à ébullition franche, avec de gros bouillons.","Laissez bouillir au moins 1 minute.","Laissez refroidir dans la casserole couverte.","Versez-la dans un récipient propre avec couvercle et buvez-la de préférence dans les 24 h."],
+eviter:["Plonger les mains ou un gobelet sale dans l'eau traitée.","Ajouter de l'eau non traitée dans le récipient."],
+al:{h:"À savoir",l:["Des comprimés ou du chlore de traitement existent : suivez exactement la notice du produit."]}},
+stockage:{c:"Stocker l'eau en sécurité",t:"Stocker l'eau en sécurité",lead:"Une eau propre peut se salir pendant le stockage.",
+faire:["Utilisez des récipients propres avec couvercle ou bouchon.","Lavez-les au savon avant de les remplir.","Servez-vous avec une louche propre à long manche ou un robinet.","Gardez l'eau à l'abri de la poussière, des animaux et des moustiques.","Videz et nettoyez le récipient régulièrement."],
+eviter:["Réutiliser un bidon qui a contenu un produit chimique.","Plonger les mains dans le récipient."],
+al:{h:"À savoir",l:["Gardez l'eau de boisson séparée de l'eau de lessive et de toilette."]}},
+diarrhee:{c:"Diarrhée : agir vite",t:"Diarrhée : agir vite",lead:"La diarrhée fait perdre beaucoup d'eau. Chez les enfants, cela peut devenir grave en quelques heures.",
+faire:["Buvez souvent, par petites gorgées.","Utilisez des sels de réhydratation orale (SRO) selon la notice, dissous dans de l'eau bouillie.","Continuez à nourrir et à allaiter les enfants.","Lavez-vous les mains au savon, surtout après les toilettes et avant de manger."],
+eviter:["Arrêter de boire.","Prendre des antibiotiques ou des médicaments contre la diarrhée sans avis d'un soignant."],
+al:{h:"Allez vite au centre de santé si",l:["C'est un bébé ou un jeune enfant.","Il y a du sang dans les selles ou une forte fièvre.","Les vomissements empêchent de boire.","Soif intense, yeux creux ou très peu d'urine."]},
+note:"Ces conseils ne remplacent pas un avis médical."},
+fuite:{c:"Fuite ou borne cassée",t:"Fuite ou borne cassée",lead:"Une fuite gaspille l'eau et peut la contaminer.",cta:1,
+faire:["Notez le lieu exact : quartier et repère connu.","Prenez une photo si vous pouvez le faire sans risque.","Signalez-la dans Aqua-Eye.","Éloignez les enfants de l'eau qui stagne."],
+eviter:["Boire l'eau de la flaque ou de la fuite.","Réparer vous-même près d'un fil électrique."]}
+};
+var ROWS=[["panne","inondation","eau-trouble","diarrhee"],["pompe","puits","bouillir","stockage","fuite"]];
+
+function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt)e.textContent=txt;return e}
+function liste(arr,cls){var u=el("ul","bx "+cls);arr.forEach(function(s){u.appendChild(el("li","",s))});return u}
+function blocLi(h,arr,cls,box){box.appendChild(el("h2","",h));box.appendChild(liste(arr,cls))}
+
+var det=document.getElementById("det"),mn=document.getElementById("mn"),bk=document.getElementById("bk"),dernier=null;
+
+function remplit(id){
+var it=M[id],b=document.getElementById("db");
+document.getElementById("dt").textContent=it.t;
+document.getElementById("dl").textContent=it.lead;
+b.innerHTML="";
+blocLi("À faire",it.faire,"steps",b);
+blocLi("À éviter",it.eviter,"no",b);
+if(it.al)blocLi(it.al.h,it.al.l,"no",b);
+if(it.note)b.appendChild(el("p","note",it.note));
+document.getElementById("dc").style.display=it.cta?"flex":"none";
+}
+function montre(id){
+remplit(id);
+det.scrollTop=0;
+det.classList.add("on");
+document.body.style.overflow="hidden";
+mn.inert=true;
+bk.focus();
+}
+function cache(){
+det.classList.remove("on");
+document.body.style.overflow="";
+mn.inert=false;
+if(dernier){dernier.focus();dernier=null}
+}
+function ouvre(id,src){
+dernier=src||null;
+history.pushState({d:id},"","#"+id);
+montre(id);
+}
+bk.onclick=function(){
+if(history.state&&history.state.d){history.back()}
+else{history.replaceState(null,"",location.pathname+location.search);cache()}
+};
+window.addEventListener("popstate",function(){
+var id=location.hash.slice(1);
+if(M[id]&&M[id].t)montre(id);else cache()
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&det.classList.contains("on"))bk.onclick()});
+
+function chip(it,id,copie){
+var e=document.createElement(it.href?"a":"button");
+e.className="ch"+(it.href?" sg":"");
+e.textContent=it.c;
+if(it.href){e.href=it.href}
+else{e.type="button";e.onclick=function(){ouvre(id,e)}}
+if(copie){e.setAttribute("aria-hidden","true");e.tabIndex=-1}
+return e
+}
+var trs=document.querySelectorAll(".tr");
+for(var k=0;k<trs.length;k++){
+var ids=ROWS[k];
+for(var c=0;c<2;c++){ids.forEach(function(id){trs[k].appendChild(chip(M[id],id,c===1))})}
+trs[k].style.animationDuration=(ids.length*11)+"s"
+}
+var pz=document.getElementById("pz"),mqs=document.querySelectorAll(".mq"),pause=false;
+pz.onclick=function(){
+pause=!pause;
+for(var j=0;j<mqs.length;j++){mqs[j].classList.toggle("p",pause)}
+pz.textContent=pause?"Lire":"Pause"
+};
+
+(function(){var id=location.hash.slice(1);if(M[id]&&M[id].t)montre(id)})();
 
 function compte(id,n){
-var el=document.getElementById(id);
-if(reduit||n===0){el.textContent=n;return}
+var e=document.getElementById(id);
+if(reduit||n===0){e.textContent=n;return}
 var d=700,t0=null;
-function f(t){if(!t0)t0=t;var p=Math.min((t-t0)/d,1);el.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)}
+function f(t){if(!t0)t0=t;var p=Math.min((t-t0)/d,1);e.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)}
 requestAnimationFrame(f)
 }
-
 function nbSignalements(){
 fetch(URL_SB+"/rest/v1/signalements?select=*",{headers:{apikey:CLE,Authorization:"Bearer "+CLE,Prefer:"count=exact",Range:"0-0"}})
 .then(function(r){var c=r.headers.get("Content-Range");var n=c?parseInt(c.split("/")[1],10):NaN;if(!isNaN(n))compte("n1",n)})
@@ -124,11 +253,10 @@ fetch(URL_SB+"/rest/v1/signalements?select=*",{headers:{apikey:CLE,Authorization
 var L=document.getElementById("liste");
 function msg(t,r){
 L.innerHTML="";
-var p=document.createElement("p");p.className="msg";p.textContent=t;L.appendChild(p);
-if(r){var b=document.createElement("button");b.className="retry";b.type="button";b.textContent="Réessayer";b.onclick=charge;L.appendChild(b)}
+var p=el("p","msg",t);L.appendChild(p);
+if(r){var b=el("button","retry","Réessayer");b.type="button";b.onclick=charge;L.appendChild(b)}
 }
 function etat(s){return s<60?"Critique":s<85?"À surveiller":"Fiable"}
-
 function charge(){
 L.innerHTML='<div class="sk"></div><div class="sk"></div>';
 var c=new AbortController(),t=setTimeout(function(){c.abort()},8000);
@@ -143,15 +271,11 @@ if(!d.length){msg("Aucun signalement pour le moment.");return}
 L.innerHTML="";
 d.slice(0,3).forEach(function(p){
 var s=Math.round(p.score);
-var e=document.createElement("div");e.className="pt";
-var h=document.createElement("div");h.className="pt-h";
-var n=document.createElement("span");n.textContent=p.lieu||p.point_eau||p.nom||"Point d'eau";
-var sc=document.createElement("span");sc.className="sc";sc.textContent=s+"/100";
-h.appendChild(n);h.appendChild(sc);
-var st=document.createElement("div");st.className="pt-s";st.textContent=etat(s);
-var b=document.createElement("div");b.className="bar";
-var f=document.createElement("i");b.appendChild(f);
-e.appendChild(h);e.appendChild(st);e.appendChild(b);L.appendChild(e);
+var e=el("div","pt"),h=el("div","pt-h");
+h.appendChild(el("span","",p.lieu||p.point_eau||p.nom||"Point d'eau"));
+h.appendChild(el("span","sc",s+"/100"));
+var b=el("div","bar"),f=document.createElement("i");b.appendChild(f);
+e.appendChild(h);e.appendChild(el("div","pt-s",etat(s)));e.appendChild(b);L.appendChild(e);
 setTimeout(function(){f.style.width=Math.max(0,Math.min(100,s))+"%"},50)
 })
 })
